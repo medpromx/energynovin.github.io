@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نهایی‌باز پلاس | بانک سوالات ریاضی ۳</title>
+    
+    <!-- بارگذاری Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- بارگذاری فونت وزیرمتن برای زیبایی بیشتر -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
+    <!-- بارگذاری React و ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- بارگذاری Babel برای کامپایل کدهای JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        /* انیمیشن ساده برای تغییر صفحات */
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // --- ICONS (SVG Components replacing lucide-react) ---
+        const CheckCircle = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
+        const Calculator = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>;
+        const TrendingUp = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>;
+        const PieChart = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>;
+        const Activity = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
+        const BoxIcon = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>;
+        const ChevronDown = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
+        const ChevronUp = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>;
+        const ArrowLeft = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>;
+        const FileText = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>;
+        const HelpCircle = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>;
+        const ChevronLeft = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>;
+
+        // --- DATABASE ---
+        const topics = [
+          {
+            id: 'functions',
+            title: 'فصل ۱: تابع (انتقال، ترکیب، وارون)',
+            icon: <TrendingUp className="w-6 h-6" />,
+            color: 'bg-blue-100 text-blue-600',
+            summary: [
+              {
+                title: '۱. انتقال نمودار (روش نقطه‌به‌نقطه)',
+                content: `
+                  <p class="mb-2 text-justify">برای رسم <span dir="ltr" class="font-bold inline-block mx-1">y = k f(ax + b) + c</span> از روش ترکینگ نقطه استفاده کنید:</p>
+                  <ul class="list-disc pr-6 space-y-2 text-sm">
+                    <li><strong>طول‌ها (x):</strong> برعکس عمل می‌کنند. اگر <span dir="ltr" class="font-bold">x - 2</span> است، ۲ واحد به راست (+). اگر <span dir="ltr" class="font-bold">2x</span> است، طول‌ها نصف (÷).</li>
+                    <li><strong>عرض‌ها (y):</strong> مستقیم عمل می‌کنند. اگر <span dir="ltr" class="font-bold">2f</span> است، عرض ۲ برابر. اگر <span dir="ltr" class="font-bold">+1</span> بیرون است، ۱ واحد بالا.</li>
+                    <li><strong>فرمول:</strong> <span dir="ltr" class="font-bold">x<sub>new</sub> = (x<sub>old</sub> - b) / a</span> و <span dir="ltr" class="font-bold">y<sub>new</sub> = k(y<sub>old</sub>) + c</span></li>
+                  </ul>
+                `
+              },
+              {
+                title: '۲. دامنه تابع مرکب (fog)',
+                content: `
+                  <div class="bg-yellow-50 p-3 rounded border-r-4 border-yellow-400 text-sm">
+                    <strong>فرمول طلایی:</strong>
+                    <div dir="ltr" class="text-center font-bold text-lg my-2">D<sub>fog</sub> = {x ∈ D<sub>g</sub> | g(x) ∈ D<sub>f</sub>}</div>
+                  </div>
+                  <p class="mt-2 text-sm">الگوریتم: ۱) دامنه‌های تکی را بنویسید. ۲) شرط ترکیبی را تشکیل دهید. ۳) نامعادله را حل و با دامنه داخلی اشتراک بگیرید.</p>
+                `
+              },
+              {
+                title: '۳. تابع وارون',
+                content: `
+                  <p class="text-sm">برای یافتن <span dir="ltr" class="font-bold">f<sup>-1</sup></span>، باید <span dir="ltr" class="font-bold">x</span> را بر حسب <span dir="ltr" class="font-bold">y</span> تنها کنید.</p>
+                  <ul class="list-disc pr-6 space-y-2 text-sm mt-2">
+                    <li><strong>هموگرافیک:</strong> جای <span dir="ltr" class="font-bold">a</span> و <span dir="ltr" class="font-bold">d</span> عوض و قرینه می‌شود.</li>
+                    <li><strong>سهمی:</strong> مربع کامل کنید، جذر بگیرید (با قدرمطلق!) و <span dir="ltr" class="font-bold">x</span> را تنها کنید.</li>
+                    <li><strong>نکته:</strong> نمودار <span dir="ltr" class="font-bold">f</span> و <span dir="ltr" class="font-bold">f<sup>-1</sup></span> نسبت به خط <span dir="ltr" class="font-bold">y = x</span> قرینه هستند.</li>
+                  </ul>
+                `
+              }
+            ],
+            questions: [
+              {
+                year: 'شهریور ۱۴۰۱',
+                score: '۰.۵ نمره',
+                question: 'نمودار تابع <span dir="ltr" class="font-bold">f</span> داده شده است (شامل نقاط <span dir="ltr" class="font-bold">(-2, 3), (0, 0), (2, -2)</span>). نمودار تابع <span dir="ltr" class="font-bold">g(x) = f(x - 1) - 2</span> را رسم کنید.',
+                answer: `
+                  ۱. **تغییر طول:** <span dir="ltr" class="font-bold">(x - 1)</span> یعنی ۱ واحد به راست.
+                  <br/>
+                  ۲. **تغییر عرض:** <span dir="ltr" class="font-bold">-2</span> یعنی ۲ واحد به پایین.
+                  <br/>
+                  ۳. **نقاط جدید:**
+                  <br/>
+                  <div dir="ltr" class="text-center font-bold my-2">
+                    (-2, 3) → (-1, 1)<br/>
+                    (0, 0) → (1, -2)<br/>
+                    (2, -2) → (3, -4)
+                  </div>
+                  این نقاط را به هم وصل کنید.
+                `
+              },
+              {
+                year: 'خرداد ۱۴۰۰',
+                score: '۱.۵ نمره',
+                question: 'اگر <span dir="ltr" class="font-bold">f(x) = 1/x</span> و <span dir="ltr" class="font-bold">g(x) = 1/(x² - 1)</span> باشد، دامنه تابع <span dir="ltr" class="font-bold">fog</span> را بیابید.',
+                answer: `
+                  ۱. <span dir="ltr" class="font-bold">D<sub>f</sub> = R - {0}</span>
+                  <br/>
+                  ۲. <span dir="ltr" class="font-bold">D<sub>g</sub> = R - {±1}</span>
+                  <br/>
+                  ۳. فرمول: <span dir="ltr" class="font-bold block text-center my-1">{x ∈ D<sub>g</sub> | g(x) ∈ D<sub>f</sub>} = {x ≠ ±1 | 1/(x² - 1) ≠ 0}</span>
+                  ۴. کسر <span dir="ltr" class="font-bold">1/(x² - 1)</span> هرگز صفر نمی‌شود. پس شرط دوم همواره برقرار است.
+                  <br/>
+                  ۵. جواب نهایی: <span dir="ltr" class="font-bold">R - {±1}</span>
+                `
+              },
+              {
+                year: 'دی ۱۴۰۱',
+                score: '۱ نمره',
+                question: 'ضابطه وارون تابع <span dir="ltr" class="font-bold">f(x) = x² - 2x - 2</span> با شرط <span dir="ltr" class="font-bold">x ≥ 1</span> را بیابید.',
+                answer: `
+                  ۱. مربع کامل: <span dir="ltr" class="font-bold">y = (x - 1)² - 3</span>
+                  <br/>
+                  ۲. انتقال: <span dir="ltr" class="font-bold">y + 3 = (x - 1)²</span>
+                  <br/>
+                  ۳. جذر: <span dir="ltr" class="font-bold">√(y + 3) = |x - 1|</span>
+                  <br/>
+                  ۴. تعیین علامت: چون <span dir="ltr" class="font-bold">x ≥ 1</span>، خود عبارت بیرون می‌آید: <span dir="ltr" class="font-bold">x - 1 = √(y + 3)</span>
+                  <br/>
+                  ۵. نتیجه: <span dir="ltr" class="font-bold">f<sup>-1</sup>(x) = 1 + √(x + 3)</span>
+                `
+              }
+            ]
+          },
+          {
+            id: 'trig',
+            title: 'فصل ۲: مثلثات (تناوب و معادلات)',
+            icon: <Activity className="w-6 h-6" />,
+            color: 'bg-green-100 text-green-600',
+            summary: [
+              {
+                title: '۱. نمودارهای مثلثاتی (یافتن a, b, c)',
+                content: `
+                  <p class="text-sm mb-2">در فرمول <span dir="ltr" class="font-bold mx-1">y = a sin(bx) + c</span>:</p>
+                  <ul class="list-disc pr-6 space-y-2 text-sm">
+                    <li class="flex items-center gap-2"><span dir="ltr" class="font-bold">c = (Max + Min) / 2</span> (محور وسط)</li>
+                    <li class="flex items-center gap-2"><span dir="ltr" class="font-bold">|a| = (Max - Min) / 2</span> (دامنه نوسان)</li>
+                    <li class="flex items-center gap-2"><span dir="ltr" class="font-bold">T = 2π / |b|</span> (دوره تناوب)</li>
+                  </ul>
+                `
+              },
+              {
+                title: '۲. حل معادلات مثلثاتی',
+                content: `
+                  <div class="grid grid-cols-2 gap-2 text-sm mt-2">
+                    <div class="bg-white p-3 border rounded text-center">
+                      <strong class="block mb-2 text-gray-700">sin x = sin a</strong>
+                      <div dir="ltr" class="font-bold text-blue-600">2kπ + a</div>
+                      <div dir="ltr" class="font-bold text-blue-600">2kπ + π - a</div>
+                    </div>
+                    <div class="bg-white p-3 border rounded text-center">
+                      <strong class="block mb-2 text-gray-700">cos x = cos a</strong>
+                      <div dir="ltr" class="font-bold text-blue-600">2kπ ± a</div>
+                    </div>
+                  </div>
+                  <p class="mt-3 text-sm text-red-600 font-medium">نکته: تبدیل <span dir="ltr" class="font-bold">cos 2x</span> به سینوس یا کسینوس بسیار مهم است.</p>
+                `
+              }
+            ],
+            questions: [
+              {
+                year: 'دی ۱۴۰۱',
+                score: '۱.۵ نمره',
+                question: 'اگر نمودار <span dir="ltr" class="font-bold">y = a + b cos((π/2)x)</span> ماکزیمم ۳ و مینیمم ۱- داشته باشد و از ماکزیمم شروع شود، مقادیر a و b را بیابید.',
+                answer: `
+                  ۱. یافتن c (همان a در فرمول ما): <span dir="ltr" class="font-bold">c = (3 + (-1)) / 2 = 1</span>. پس <span dir="ltr" class="font-bold">a = 1</span>.
+                  <br/>
+                  ۲. یافتن دامنه (همان b در فرمول ما): <span dir="ltr" class="font-bold">|b| = (3 - (-1)) / 2 = 2</span>.
+                  <br/>
+                  ۳. علامت: چون کسینوس از ماکزیمم شروع شده، ضریب مثبت است.
+                  <br/>
+                  جواب: <span dir="ltr" class="font-bold">a = 1, b = 2</span>
+                `
+              },
+              {
+                year: 'خرداد ۱۴۰۱',
+                score: '۱.۵ نمره',
+                question: 'معادله مثلثاتی <span dir="ltr" class="font-bold">sin x - cos 2x = 0</span> را حل کنید.',
+                answer: `
+                  ۱. تبدیل: <span dir="ltr" class="font-bold">cos 2x = 1 - 2sin² x</span>
+                  <br/>
+                  ۲. جایگذاری: <span dir="ltr" class="font-bold block text-center my-1">sin x - (1 - 2sin² x) = 0 → 2sin² x + sin x - 1 = 0</span>
+                  ۳. حل درجه ۲ (با <span dir="ltr" class="font-bold">t = sin x</span>): ریشه‌ها <span dir="ltr" class="font-bold">t = -1</span> و <span dir="ltr" class="font-bold">t = 1/2</span>.
+                  <br/>
+                  ۴. جواب‌ها:
+                  <br/>
+                  <span dir="ltr" class="font-bold">sin x = -1 → x = 2kπ - π/2</span>
+                  <br/>
+                  <span dir="ltr" class="font-bold">sin x = 1/2 → x = 2kπ + π/6  ,  x = 2kπ + 5π/6</span>
+                `
+              }
+            ]
+          },
+          {
+            id: 'limits',
+            title: 'فصل ۳: حد بی‌نهایت و حد در بی‌نهایت',
+            icon: <Activity className="w-6 h-6" />,
+            color: 'bg-purple-100 text-purple-600',
+            summary: [
+              {
+                title: '۱. قاعده پرتوان (حد در بی‌نهایت)',
+                content: `
+                  <p class="text-sm mb-2">وقتی <span dir="ltr" class="font-bold">x → ±∞</span> فقط جملات با بزرگترین توان را نگه دارید.</p>
+                  <div class="bg-red-50 p-2 rounded text-red-700 text-sm border border-red-200">
+                    <strong>هشدار:</strong> <span dir="ltr" class="font-bold">√(x²) = |x|</span>. در <span dir="ltr" class="font-bold">-∞</span> قرینه بیرون می‌آید (<span dir="ltr" class="font-bold">-x</span>).
+                  </div>
+                `
+              },
+              {
+                title: '۲. عدد بر روی صفر (حد نامتناهی)',
+                content: `
+                  <p class="text-sm">اگر مخرج صفر شد، جواب <span dir="ltr" class="font-bold">∞</span> است. علامت را با تعیین علامت مخرج بیابید.</p>
+                  <ul class="list-disc pr-6 space-y-1 text-sm mt-2">
+                    <li>توان زوج یا قدرمطلق در مخرج همیشه <span dir="ltr" class="font-bold">0⁺</span> (مثبت) است.</li>
+                  </ul>
+                `
+              }
+            ],
+            questions: [
+              {
+                year: 'خرداد ۱۴۰۲',
+                score: '۱.۵ نمره',
+                question: 'حاصل <span dir="ltr" class="font-bold">lim<sub>x→-∞</sub> (3x - √(4x² + x)) / 5x</span> را بیابید.',
+                answer: `
+                  ۱. پرتوان زیر رادیکال: <span dir="ltr" class="font-bold">√(4x²) = |2x|</span>.
+                  <br/>
+                  ۲. چون <span dir="ltr" class="font-bold">x → -∞</span>، پس <span dir="ltr" class="font-bold">|2x| = -2x</span>.
+                  <br/>
+                  ۳. جایگذاری: <span dir="ltr" class="font-bold block text-center my-1">(3x - (-2x)) / 5x = 5x / 5x = 1</span>
+                `
+              },
+              {
+                year: 'دی ۱۴۰۲',
+                score: '۱.۵ نمره',
+                question: 'حاصل <span dir="ltr" class="font-bold">lim<sub>x→2⁻</sub> ([x] - 3) / (x - 2)</span> را بیابید.',
+                answer: `
+                  ۱. صورت: در <span dir="ltr" class="font-bold">2⁻</span> (مثلاً ۱.۹)، <span dir="ltr" class="font-bold">[x] = 1</span>. پس صورت: <span dir="ltr" class="font-bold">1 - 3 = -2</span>.
+                  <br/>
+                  ۲. مخرج: <span dir="ltr" class="font-bold">2⁻ - 2 = 0⁻</span>.
+                  <br/>
+                  ۳. جواب: <span dir="ltr" class="font-bold">-2 / 0⁻ = +∞</span>.
+                `
+              }
+            ]
+          },
+          {
+            id: 'derivatives',
+            title: 'فصل ۴: مشتق و خط مماس',
+            icon: <Activity className="w-6 h-6" />,
+            color: 'bg-rose-100 text-rose-600',
+            summary: [
+              {
+                title: '۱. قواعد مشتق‌گیری (ساده نکنید!)',
+                content: `
+                  <ul class="list-disc pr-6 space-y-2 text-sm">
+                    <li><strong>ضرب:</strong> مشتق اولی در دومی + مشتق دومی در اولی</li>
+                    <li><strong>تقسیم:</strong> (مشتق صورت در مخرج - مشتق مخرج در صورت) تقسیم بر مخرج به توان ۲</li>
+                    <li><strong>زنجیره‌ای:</strong> <span dir="ltr" class="font-bold">(uⁿ)' = n uⁿ⁻¹ u'</span></li>
+                  </ul>
+                `
+              },
+              {
+                title: '۲. آهنگ تغییر',
+                content: `
+                  <p class="text-sm mb-1"><strong>متوسط:</strong> <span dir="ltr" class="font-bold">Δy / Δx = (f(b) - f(a)) / (b - a)</span></p>
+                  <p class="text-sm"><strong>لحظه‌ای:</strong> <span dir="ltr" class="font-bold">f'(a)</span> (مشتق در نقطه)</p>
+                `
+              }
+            ],
+            questions: [
+              {
+                year: 'دی ۱۴۰۰',
+                score: '۱.۵ نمره',
+                question: 'معادله خط مماس بر <span dir="ltr" class="font-bold">f(x) = x³ - 2x + 1</span> را در <span dir="ltr" class="font-bold">x = 2</span> بنویسید.',
+                answer: `
+                  ۱. نقطه تماس (<span dir="ltr" class="font-bold">y₀</span>): <span dir="ltr" class="font-bold">f(2) = 8 - 4 + 1 = 5</span>. نقطه <span dir="ltr" class="font-bold">(2, 5)</span>.
+                  <br/>
+                  ۲. شیب (<span dir="ltr" class="font-bold">m</span>): <span dir="ltr" class="font-bold">f'(x) = 3x² - 2 → f'(2) = 12 - 2 = 10</span>.
+                  <br/>
+                  ۳. معادله خط: <span dir="ltr" class="font-bold">y - 5 = 10(x - 2)</span>.
+                `
+              },
+              {
+                year: 'خرداد ۱۴۰۲',
+                score: '۱.۵ نمره',
+                question: 'آهنگ تغییر متوسط تابع <span dir="ltr" class="font-bold">f(t) = t² + 2t</span> در بازه <span dir="ltr" class="font-bold">[2, 3]</span> چقدر بیشتر از آهنگ لحظه‌ای در <span dir="ltr" class="font-bold">t = 2</span> است؟',
+                answer: `
+                  ۱. متوسط: <span dir="ltr" class="font-bold">(f(3) - f(2)) / (3 - 2) = (15 - 8) / 1 = 7</span>.
+                  <br/>
+                  ۲. لحظه‌ای: <span dir="ltr" class="font-bold">f'(t) = 2t + 2 → f'(2) = 6</span>.
+                  <br/>
+                  ۳. اختلاف: <span dir="ltr" class="font-bold">7 - 6 = 1</span>.
+                `
+              }
+            ]
+          },
+          {
+            id: 'applications',
+            title: 'فصل ۵: کاربرد مشتق (اکسترمم و بهینه‌سازی)',
+            icon: <PieChart className="w-6 h-6" />,
+            color: 'bg-orange-100 text-orange-600',
+            summary: [
+              {
+                title: '۱. اکسترمم مطلق در بازه بسته',
+                content: `
+                  <p class="text-sm mb-2">الگوریتم:</p>
+                  <ol class="list-decimal pr-6 space-y-1 text-sm">
+                    <li>مشتق بگیرید و ریشه‌ها را بیابید (نقاط بحرانی).</li>
+                    <li>نقاط بحرانیِ <strong>داخل بازه</strong> را جدا کنید.</li>
+                    <li>تابع را به ازای بحرانی‌ها و <strong>سر و ته بازه</strong> مقداردهی کنید.</li>
+                    <li>بزرگترین = Max، کوچکترین = Min.</li>
+                  </ol>
+                `
+              },
+              {
+                title: '۲. بهینه‌سازی (مسائل کلامی)',
+                content: `
+                  <p class="text-sm">هدف: نوشتن تابع هدف به صورت یک متغیره (با استفاده از رابطه کمکی) و صفر کردن مشتق آن.</p>
+                `
+              }
+            ],
+            questions: [
+              {
+                year: 'دی ۱۴۰۰',
+                score: '۱ نمره',
+                question: 'اکسترمم‌های مطلق تابع <span dir="ltr" class="font-bold">f(x) = 2x³ - 3x² - 12x</span> را در بازه <span dir="ltr" class="font-bold">[-2, 3]</span> بیابید.',
+                answer: `
+                  ۱. مشتق: <span dir="ltr" class="font-bold">6x² - 6x - 12 = 0 → x² - x - 2 = 0</span>.
+                  <br/>
+                  ۲. ریشه‌ها: <span dir="ltr" class="font-bold">x = -1</span> و <span dir="ltr" class="font-bold">x = 2</span> (هر دو در بازه هستند).
+                  <br/>
+                  ۳. جدول مقادیر:
+                  <br/>
+                  <div dir="ltr" class="text-center font-bold my-2">
+                  f(-2) = -4<br/>
+                  f(-1) = 7 (Max)<br/>
+                  f(2) = -20 (Min)<br/>
+                  f(3) = -9
+                  </div>
+                `
+              },
+              {
+                year: 'خرداد ۱۴۰۱',
+                score: '۲ نمره',
+                question: 'از یک مقوای مربعی به ضلع ۳۰، گوشه‌ها را (مربعی به ضلع x) برش زده و جعبه می‌سازیم. x چقدر باشد تا حجم ماکزیمم شود؟',
+                answer: `
+                  ۱. ابعاد جعبه: طول و عرض = <span dir="ltr" class="font-bold">30 - 2x</span>، ارتفاع = <span dir="ltr" class="font-bold">x</span>.
+                  <br/>
+                  ۲. تابع حجم: <span dir="ltr" class="font-bold">V(x) = x(30 - 2x)²</span>.
+                  <br/>
+                  ۳. مشتق: <span dir="ltr" class="font-bold">V'(x) = (30 - 2x)² + x(2)(30 - 2x)(-2) = 0</span>.
+                  <br/>
+                  ۴. فاکتورگیری: <span dir="ltr" class="font-bold">(30 - 2x)(30 - 2x - 4x) = 0</span>.
+                  <br/>
+                  ۵. ریشه‌ها: <span dir="ltr" class="font-bold">x = 15</span> (غیرقابل قبول) و <span dir="ltr" class="font-bold">x = 5</span> (جواب).
+                `
+              }
+            ]
+          },
+          {
+            id: 'geometry',
+            title: 'فصل ۶: هندسه (بیضی و دایره)',
+            icon: <BoxIcon className="w-6 h-6" />,
+            color: 'bg-indigo-100 text-indigo-600',
+            summary: [
+              {
+                title: '۱. بیضی (رابطه طلایی)',
+                content: `
+                  <div class="bg-indigo-50 p-2 text-center rounded text-sm mb-2 font-bold text-indigo-900">
+                    <span dir="ltr">a² = b² + c²</span>
+                  </div>
+                  <p class="text-sm leading-6">
+                    <span dir="ltr" class="font-bold">a</span>: بزرگترین عدد (فاصله مرکز تا راس)<br/>
+                    <span dir="ltr" class="font-bold">c</span>: فاصله کانونی (مرکز تا کانون)<br/>
+                    <span dir="ltr" class="font-bold">e = c/a</span>: خروج از مرکز
+                  </p>
+                `
+              },
+              {
+                title: '۲. دایره',
+                content: `
+                  <p class="text-sm">مرکز <span dir="ltr" class="font-bold">(a, b)</span> و شعاع <span dir="ltr" class="font-bold">R</span>:</p>
+                  <div dir="ltr" class="text-center font-bold my-1">(x - a)² + (y - b)² = R²</div>
+                  <p class="text-xs mt-2 text-gray-500">برای یافتن مرکز از معادله گسترده، ضرایب x و y را تقسیم بر ۲- کنید.</p>
+                `
+              }
+            ],
+            questions: [
+              {
+                year: 'خرداد ۱۴۰۲',
+                score: '۱.۷۵ نمره',
+                question: 'کانون‌های بیضی <span dir="ltr" class="font-bold">F(3, 1)</span> و <span dir="ltr" class="font-bold">F\'(3, -5)</span> و قطر کوچک ۶ است. معادله را بنویسید.',
+                answer: `
+                  ۱. مرکز (وسط کانون‌ها): <span dir="ltr" class="font-bold">O(3, -2)</span>.
+                  <br/>
+                  ۲. فاصله کانونی (<span dir="ltr" class="font-bold">2c</span>): فاصله ۱ تا ۵- برابر ۶ است. پس <span dir="ltr" class="font-bold">c = 3</span>.
+                  <br/>
+                  ۳. قطر کوچک (<span dir="ltr" class="font-bold">2b = 6</span>): پس <span dir="ltr" class="font-bold">b = 3</span>.
+                  <br/>
+                  ۴. محاسبه <span dir="ltr" class="font-bold">a</span>: <span dir="ltr" class="font-bold">a² = 3² + 3² = 18</span>.
+                  <br/>
+                  ۵. معادله (قائم): <span dir="ltr" class="font-bold">(x - 3)²/9 + (y + 2)²/18 = 1</span>.
+                `
+              }
+            ]
+          },
+          {
+            id: 'probability',
+            title: 'فصل ۷: احتمال (قانون احتمال کل)',
+            icon: <CheckCircle className="w-6 h-6" />,
+            color: 'bg-teal-100 text-teal-600',
+            summary: [
+              {
+                title: 'نمودار درختی',
+                content: `
+                  <p class="text-sm">برای مسائل چند ظرفی، نمودار درختی بکشید.</p>
+                  <ul class="list-disc pr-6 space-y-1 text-sm mt-2">
+                    <li>احتمال کل = مجموع حاصل‌ضرب شاخه‌هایی که به نتیجه می‌رسند.</li>
+                    <li>احتمال شرطی (بیز) = (شاخه مطلوب) تقسیم بر (احتمال کل).</li>
+                  </ul>
+                `
+              }
+            ],
+            questions: [
+              {
+                year: 'خرداد ۱۴۰۲',
+                score: '۱.۲۵ نمره',
+                question: 'دو جعبه داریم. جعبه اول ۹ سالم ۳ معیوب، جعبه دوم ۵ سالم ۱ معیوب. به تصادف یک جعبه و سپس یک لامپ انتخاب می‌کنیم. احتمال سالم بودن؟',
+                answer: `
+                  ۱. مسیر ۱ (جعبه ۱): <span dir="ltr" class="font-bold">(1/2) × (9/12) = 9/24</span>
+                  <br/>
+                  ۲. مسیر ۲ (جعبه ۲): <span dir="ltr" class="font-bold">(1/2) × (5/6) = 5/12 = 10/24</span>
+                  <br/>
+                  ۳. جمع کل: <span dir="ltr" class="font-bold">19/24</span>
+                `
+              }
+            ]
+          }
+        ];
+
+        // --- COMPONENTS ---
+
+        const MathText = ({ content }) => {
+          return <div className="math-content text-gray-800 leading-relaxed text-sm" dangerouslySetInnerHTML={{ __html: content }} />;
+        };
+
+        const QuestionCard = ({ q, index }) => {
+          const [isOpen, setIsOpen] = useState(false);
+
+          return (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-4 transition-all hover:shadow-md">
+              <div className="p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-md font-medium">
+                    {q.year}
+                  </span>
+                  <span className="text-xs font-bold text-emerald-600">{q.score}</span>
+                </div>
+                
+                <div className="mb-4">
+                  <MathText content={q.question} />
+                </div>
+
+                <button 
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="flex items-center justify-center w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm font-medium rounded-md transition-colors"
+                >
+                  {isOpen ? (
+                    <>
+                      <ChevronUp className="w-4 h-4 ml-1" />
+                      مخفی کردن پاسخ
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4 ml-1" />
+                      نمایش پاسخ تشریحی
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {isOpen && (
+                <div className="bg-gray-50 p-4 border-t border-gray-100 text-sm relative">
+                   <div className="absolute top-0 right-4 w-0.5 h-full bg-emerald-400 opacity-50"></div>
+                   <div className="pr-3">
+                     <MathText content={q.answer} />
+                   </div>
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        const TopicDetail = ({ topic, onBack }) => {
+          const [activeTab, setActiveTab] = useState('summary'); // summary | questions
+
+          return (
+            <div className="animate-fade-in">
+              {/* Header */}
+              <div className={`p-6 ${topic.color.split(' ')[0]} rounded-b-3xl shadow-sm mb-6`}>
+                <button onClick={onBack} className="flex items-center text-sm mb-4 opacity-70 hover:opacity-100 transition-opacity">
+                  <ArrowLeft className="w-4 h-4 mr-1" />
+                  بازگشت به خانه
+                </button>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/50 rounded-lg backdrop-blur-sm">
+                    {topic.icon}
+                  </div>
+                  <h1 className="text-xl font-bold text-gray-800">{topic.title}</h1>
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex px-4 mb-6 sticky top-0 bg-gray-50 z-10 py-2">
+                <button 
+                  onClick={() => setActiveTab('summary')}
+                  className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${activeTab === 'summary' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    درسنامه کپسولی
+                  </div>
+                </button>
+                <button 
+                  onClick={() => setActiveTab('questions')}
+                  className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all mr-2 ${activeTab === 'questions' ? 'bg-white shadow text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <HelpCircle className="w-4 h-4" />
+                    بانک سوالات نهایی
+                  </div>
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="px-4 pb-10">
+                {activeTab === 'summary' ? (
+                  <div className="space-y-4">
+                    {topic.summary.map((item, idx) => (
+                      <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                        <h3 className="font-bold text-gray-800 mb-3 flex items-center">
+                          <span className="w-2 h-2 bg-blue-500 rounded-full ml-2"></span>
+                          {item.title}
+                        </h3>
+                        <MathText content={item.content} />
+                      </div>
+                    ))}
+                     <div className="bg-blue-50 p-4 rounded-xl text-xs text-blue-700 leading-6 text-center mt-6">
+                        این خلاصه‌ها برای مرور شب امتحان طراحی شده‌اند. <br/> برای تسلط کامل، سوالات تب کناری را حتما حل کنید.
+                     </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                     <div className="bg-emerald-50 p-3 rounded-lg text-xs text-emerald-800 mb-4 flex items-center">
+                        <CheckCircle className="w-4 h-4 ml-2" />
+                        سوالات زیر عیناً از امتحانات نهایی ۵ سال اخیر انتخاب شده‌اند.
+                     </div>
+                    {topic.questions.map((q, idx) => (
+                      <QuestionCard key={idx} q={q} index={idx} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        };
+
+        const HomePage = ({ onSelectTopic }) => {
+          return (
+            <div className="p-6">
+              <header className="mb-8 mt-2">
+                <div className="flex justify-between items-start">
+                   <div>
+                     <h1 className="text-2xl font-black text-gray-800 mb-1">نهایی‌باز <span className="text-blue-600">پلاس</span></h1>
+                     <p className="text-sm text-gray-500">بانک هوشمند سوالات امتحان نهایی ریاضی ۳</p>
+                   </div>
+                   <div className="bg-white p-2 rounded-full shadow-sm">
+                     <Calculator className="w-6 h-6 text-blue-600" />
+                   </div>
+                </div>
+              </header>
+
+              <div className="grid grid-cols-1 gap-4">
+                {topics.map((topic) => (
+                  <button 
+                    key={topic.id}
+                    onClick={() => onSelectTopic(topic)}
+                    className="group bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all flex items-center text-right"
+                  >
+                    <div className={`p-3 rounded-xl ml-4 transition-colors ${topic.color} group-hover:bg-opacity-80`}>
+                      {topic.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-800 mb-1 group-hover:text-blue-700 transition-colors">{topic.title}</h3>
+                      <p className="text-xs text-gray-400">شامل درسنامه و {topic.questions.length} سوال منتخب</p>
+                    </div>
+                    <ChevronLeft className="w-5 h-5 text-gray-300 group-hover:text-blue-400 group-hover:-translate-x-1 transition-all" />
+                  </button>
+                ))}
+              </div>
+
+              <footer className="mt-10 text-center text-xs text-gray-400">
+                <p>طراحی شده برای موفقیت در امتحانات نهایی</p>
+                <p className="mt-1 dir-ltr font-mono text-[10px] opacity-50">Version 1.1.0 | HTML Edition</p>
+              </footer>
+            </div>
+          );
+        };
+
+        const App = () => {
+          const [currentTopic, setCurrentTopic] = useState(null);
+
+          return (
+            <div dir="rtl" className="min-h-screen bg-gray-50 font-sans text-right max-w-md mx-auto shadow-2xl overflow-hidden border-x border-gray-200">
+              {currentTopic ? (
+                <TopicDetail topic={currentTopic} onBack={() => setCurrentTopic(null)} />
+              ) : (
+                <HomePage onSelectTopic={setCurrentTopic} />
+              )}
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
