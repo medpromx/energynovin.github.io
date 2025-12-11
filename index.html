@@ -24,9 +24,9 @@
                         }
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.4s ease-out',
-                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'float': 'float 6s ease-in-out infinite',
                     },
                     keyframes: {
                         fadeIn: {
@@ -34,8 +34,12 @@
                             '100%': { opacity: '1' },
                         },
                         slideUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
                         }
                     }
                 }
@@ -54,20 +58,27 @@
     <style>
         body { 
             font-family: 'Vazirmatn', sans-serif; 
-            background-color: #f8fafc;
+            background-color: #f1f5f9;
             -webkit-tap-highlight-color: transparent;
-        }
-        /* Hide scrollbar for clean UI */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
         }
         .math-font {
             font-family: 'Times New Roman', serif;
             font-style: italic;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
         }
     </style>
 </head>
@@ -82,131 +93,527 @@
 
         // --- ICONS (SVG) ---
         const Icons = {
-            Home: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            User: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            Key: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>,
             Back: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
             Book: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
             Exam: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>,
             Chart: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>,
             ChevronDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>,
             ChevronUp: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>,
-            Zoom: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/></svg>
+            Logout: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>,
+            Func: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M9 17V7h6"/><path d="M9 12h6"/></svg>,
+            Trig: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+            Limit: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M8 10h.01"/><path d="M12 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/></svg>,
+            Deriv: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+            App: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>,
+            Geo: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            Prob: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>,
+            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         };
 
-        // --- VISUALIZATIONS (Interactive Components) ---
+        // --- VISUALIZATIONS ---
 
-        // 1. Probability Tree Diagram
-        const ProbabilityViz = () => {
-            return (
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                    <h3 className="text-sm font-bold text-slate-800 mb-4 border-b pb-2">مدلسازی احتمال کل (قضیه بیز)</h3>
-                    <div className="relative h-64 w-full">
-                        <svg className="w-full h-full" viewBox="0 0 300 200">
-                            {/* Lines */}
-                            <line x1="20" y1="100" x2="100" y2="50" stroke="#94a3b8" strokeWidth="2" />
-                            <line x1="20" y1="100" x2="100" y2="150" stroke="#94a3b8" strokeWidth="2" />
-                            <line x1="100" y1="50" x2="220" y2="30" stroke="#cbd5e1" strokeDasharray="4" />
-                            <line x1="100" y1="50" x2="220" y2="70" stroke="#cbd5e1" strokeDasharray="4" />
-                            <line x1="100" y1="150" x2="220" y2="130" stroke="#cbd5e1" strokeDasharray="4" />
-                            <line x1="100" y1="150" x2="220" y2="170" stroke="#cbd5e1" strokeDasharray="4" />
-
-                            {/* Nodes A */}
-                            <circle cx="20" cy="100" r="15" fill="#3b82f6" />
-                            <text x="20" y="105" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">Start</text>
-
-                            {/* Nodes B */}
-                            <rect x="100" y="35" width="40" height="30" rx="4" fill="#ef4444" fillOpacity="0.1" stroke="#ef4444" />
-                            <text x="120" y="55" textAnchor="middle" fill="#ef4444" fontSize="10">ظرف A</text>
-                            
-                            <rect x="100" y="135" width="40" height="30" rx="4" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" />
-                            <text x="120" y="155" textAnchor="middle" fill="#3b82f6" fontSize="10">ظرف B</text>
-
-                            {/* Probabilities */}
-                            <text x="60" y="70" fontSize="9" fill="#64748b">P(A)</text>
-                            <text x="60" y="130" fontSize="9" fill="#64748b">P(B)</text>
-
-                            {/* Outcomes */}
-                            <circle cx="230" cy="30" r="6" fill="#ef4444" />
-                            <circle cx="230" cy="70" r="6" fill="#3b82f6" />
-                            <circle cx="230" cy="130" r="6" fill="#ef4444" />
-                            <circle cx="230" cy="170" r="6" fill="#3b82f6" />
-                        </svg>
-                    </div>
-                    <div className="mt-2 text-xs text-slate-500 text-justify leading-5 bg-slate-50 p-2 rounded">
-                        نمودار درختی فوق مسیرهای ممکن برای انتخاب مهره را نشان می‌دهد. مجموع حاصل‌ضرب شاخه‌ها، احتمال کل را تشکیل می‌دهد.
-                    </div>
+        const ProbabilityViz = () => (
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                <h3 className="text-lg font-bold text-slate-800 mb-6 border-b pb-2 flex items-center gap-2">
+                    <span className="bg-purple-100 text-purple-600 p-1 rounded"><Icons.Prob /></span>
+                    شبیه‌سازی احتمال کل (قضیه بیز)
+                </h3>
+                <div className="relative h-64 w-full">
+                    <svg className="w-full h-full" viewBox="0 0 300 200">
+                        <line x1="20" y1="100" x2="100" y2="50" stroke="#94a3b8" strokeWidth="2" />
+                        <line x1="20" y1="100" x2="100" y2="150" stroke="#94a3b8" strokeWidth="2" />
+                        <line x1="100" y1="50" x2="220" y2="30" stroke="#cbd5e1" strokeDasharray="4" />
+                        <line x1="100" y1="50" x2="220" y2="70" stroke="#cbd5e1" strokeDasharray="4" />
+                        <line x1="100" y1="150" x2="220" y2="130" stroke="#cbd5e1" strokeDasharray="4" />
+                        <line x1="100" y1="150" x2="220" y2="170" stroke="#cbd5e1" strokeDasharray="4" />
+                        <circle cx="20" cy="100" r="15" fill="#8b5cf6" />
+                        <text x="20" y="105" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">شروع</text>
+                        <rect x="100" y="35" width="40" height="30" rx="4" fill="#ef4444" fillOpacity="0.1" stroke="#ef4444" />
+                        <text x="120" y="55" textAnchor="middle" fill="#ef4444" fontSize="10">ظرف A</text>
+                        <rect x="100" y="135" width="40" height="30" rx="4" fill="#3b82f6" fillOpacity="0.1" stroke="#3b82f6" />
+                        <text x="120" y="155" textAnchor="middle" fill="#3b82f6" fontSize="10">ظرف B</text>
+                        <circle cx="230" cy="30" r="6" fill="#ef4444" />
+                        <circle cx="230" cy="70" r="6" fill="#3b82f6" />
+                        <circle cx="230" cy="130" r="6" fill="#ef4444" />
+                        <circle cx="230" cy="170" r="6" fill="#3b82f6" />
+                    </svg>
                 </div>
-            );
-        };
+            </div>
+        );
 
-        // 2. Function Transformation Viz
         const FunctionViz = () => {
-            const [shift, setShift] = useState(0);
+            const [shiftH, setShiftH] = useState(0);
+            const [shiftV, setShiftV] = useState(0);
             return (
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                    <h3 className="text-sm font-bold text-slate-800 mb-4 border-b pb-2">شبیه‌سازی انتقال تابع f(x-a)</h3>
-                    
-                    <div className="h-40 bg-slate-50 rounded border border-slate-200 relative overflow-hidden mb-4 flex items-center justify-center">
-                        {/* Grid */}
-                        <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 opacity-10 pointer-events-none">
-                            {[...Array(24)].map((_, i) => <div key={i} className="border border-slate-800"></div>)}
+                <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                    <h3 className="text-lg font-bold text-slate-800 mb-6 border-b pb-2 flex items-center gap-2">
+                         <span className="bg-indigo-100 text-indigo-600 p-1 rounded"><Icons.Func /></span>
+                         آزمایشگاه انتقال تابع
+                    </h3>
+                    <div className="h-48 bg-slate-50 rounded-xl border border-slate-200 relative overflow-hidden mb-6 flex items-center justify-center">
+                        <div className="absolute inset-0 grid grid-cols-12 grid-rows-8 opacity-10 pointer-events-none">
+                            {[...Array(96)].map((_, i) => <div key={i} className="border border-slate-400"></div>)}
                         </div>
-                        <div className="absolute w-full h-0.5 bg-slate-300"></div>
-                        <div className="absolute h-full w-0.5 bg-slate-300"></div>
-
-                        {/* Static Function (Ghost) */}
+                        <div className="absolute w-full h-0.5 bg-slate-400"></div>
+                        <div className="absolute h-full w-0.5 bg-slate-400"></div>
                         <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20" viewBox="0 0 200 100">
-                             <path d="M70 10 Q100 90 130 10" fill="none" stroke="black" strokeWidth="2" />
+                             <path d="M70 10 Q100 90 130 10" fill="none" stroke="black" strokeWidth="2" strokeDasharray="4"/>
                         </svg>
-
-                        {/* Dynamic Function */}
                         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 200 100">
-                             <path d={`M${70 + shift*10} 10 Q${100 + shift*10} 90 ${130 + shift*10} 10`} fill="none" stroke="#6366f1" strokeWidth="3" />
+                             <path d={`M${70 + shiftH*10} ${10 + shiftV*10} Q${100 + shiftH*10} ${90 + shiftV*10} ${130 + shiftH*10} ${10 + shiftV*10}`} fill="none" stroke="#6366f1" strokeWidth="3" />
                         </svg>
                     </div>
-
-                    <div className="flex items-center gap-4">
-                        <span className="text-xs font-bold w-8 text-center">{shift > 0 ? `+${shift}` : shift}</span>
-                        <input 
-                            type="range" 
-                            min="-4" 
-                            max="4" 
-                            value={shift} 
-                            onChange={(e) => setShift(parseInt(e.target.value))}
-                            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 mb-1 block">انتقال افقی (x): {shiftH}</label>
+                            <input type="range" min="-4" max="4" value={shiftH} onChange={(e) => setShiftH(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"/>
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 mb-1 block">انتقال عمودی (y): {shiftV * -1}</label>
+                            <input type="range" min="-4" max="4" value={shiftV} onChange={(e) => setShiftV(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"/>
+                        </div>
                     </div>
-                    <div className="mt-2 text-center text-xs text-indigo-700 font-mono dir-ltr">
-                        y = f(x - {shift})
+                    <div className="mt-4 text-center text-sm bg-indigo-50 p-2 rounded text-indigo-700 font-mono dir-ltr font-bold">
+                        y = f(x - {shiftH}) {shiftV > 0 ? `- ${shiftV}` : `+ ${Math.abs(shiftV)}`}
                     </div>
                 </div>
             );
         };
 
-        // --- COMPONENTS ---
+        const GeometryViz = () => {
+            const [a, setA] = useState(60);
+            const [b, setB] = useState(40);
+            return (
+                <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                    <h3 className="text-lg font-bold text-slate-800 mb-6 border-b pb-2 flex items-center gap-2">
+                        <span className="bg-cyan-100 text-cyan-600 p-1 rounded"><Icons.Geo /></span>
+                        شبیه‌ساز بیضی
+                    </h3>
+                    <div className="h-48 bg-slate-50 rounded-xl border border-slate-200 relative overflow-hidden mb-6 flex items-center justify-center">
+                        <div className="absolute inset-0 grid grid-cols-12 grid-rows-8 opacity-10 pointer-events-none">
+                            {[...Array(96)].map((_, i) => <div key={i} className="border border-slate-300"></div>)}
+                        </div>
+                         <div className="absolute w-full h-0.5 bg-slate-400"></div>
+                         <div className="absolute h-full w-0.5 bg-slate-400"></div>
+                        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 150">
+                            <ellipse cx="100" cy="75" rx={a} ry={b} fill="rgba(6, 182, 212, 0.2)" stroke="#0891b2" strokeWidth="2" />
+                            <circle cx={100 + Math.sqrt(Math.abs(a*a - b*b))} cy="75" r="3" fill="#ef4444" />
+                            <circle cx={100 - Math.sqrt(Math.abs(a*a - b*b))} cy="75" r="3" fill="#ef4444" />
+                        </svg>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 mb-1 block">قطر افقی (2a): {Math.round(a/5)}</label>
+                            <input type="range" min="10" max="90" value={a} onChange={(e) => setA(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600"/>
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 mb-1 block">قطر عمودی (2b): {Math.round(b/5)}</label>
+                            <input type="range" min="10" max="70" value={b} onChange={(e) => setB(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600"/>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const BoxOptimizationViz = () => {
+            const [x, setX] = useState(2);
+            // Box side = 30. Volume = x(30-2x)(30-2x). Max x around 5.
+            const side = 30;
+            const volume = x * (side - 2*x) * (side - 2*x);
+            const maxVolume = 2000; // approx
+            
+            return (
+                 <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                    <h3 className="text-lg font-bold text-slate-800 mb-6 border-b pb-2 flex items-center gap-2">
+                        <span className="bg-emerald-100 text-emerald-600 p-1 rounded"><Icons.App /></span>
+                        بهینه‌سازی حجم جعبه
+                    </h3>
+                    <div className="flex gap-4 items-end justify-center h-40 bg-slate-50 rounded-xl border border-slate-200 p-4 mb-4 relative">
+                        {/* The Cutout Sheet */}
+                        <div className="relative border-2 border-slate-400 bg-amber-100 transition-all duration-300" style={{width: '100px', height: '100px'}}>
+                            <div className="absolute top-0 left-0 bg-white border-r border-b border-dashed border-red-400" style={{width: `${x*3}px`, height: `${x*3}px`}}></div>
+                            <div className="absolute top-0 right-0 bg-white border-l border-b border-dashed border-red-400" style={{width: `${x*3}px`, height: `${x*3}px`}}></div>
+                            <div className="absolute bottom-0 left-0 bg-white border-r border-t border-dashed border-red-400" style={{width: `${x*3}px`, height: `${x*3}px`}}></div>
+                            <div className="absolute bottom-0 right-0 bg-white border-l border-t border-dashed border-red-400" style={{width: `${x*3}px`, height: `${x*3}px`}}></div>
+                            <div className="absolute inset-0 flex items-center justify-center text-[10px] text-slate-500 font-mono">Top View</div>
+                        </div>
+                        {/* The Volume Bar */}
+                        <div className="w-16 bg-emerald-200 rounded-t-lg relative transition-all duration-300" style={{height: `${(volume/maxVolume)*100}%`, maxHeight: '100%'}}>
+                             <div className="absolute bottom-0 w-full text-center text-[10px] font-bold text-emerald-800 pb-1">{Math.round(volume)}</div>
+                        </div>
+                    </div>
+                     <div>
+                        <label className="text-xs font-bold text-slate-500 mb-1 block">اندازه برش (x): {x}</label>
+                        <input type="range" min="1" max="14" step="0.5" value={x} onChange={(e) => setX(parseFloat(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"/>
+                        <p className="text-xs text-slate-400 mt-2 text-center">x = 5 حجم را ماکزیمم می‌کند.</p>
+                    </div>
+                 </div>
+            );
+        };
+
+        // --- AUTH COMPONENT ---
+
+        const LoginPage = ({ onLogin }) => {
+            const [username, setUsername] = useState("");
+            const [password, setPassword] = useState("");
+            const [error, setError] = useState("");
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (username === "admin" && password === "admin") {
+                    onLogin(username);
+                } else {
+                    setError("نام کاربری یا رمز عبور اشتباه است");
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-brand-50 to-indigo-100">
+                    <div className="bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl border border-white/50 animate-slide-up">
+                        <div className="text-center mb-8">
+                            <div className="w-20 h-20 bg-gradient-to-tr from-brand-500 to-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-white shadow-xl shadow-brand-200 mb-4 animate-float">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                            </div>
+                            <h1 className="text-3xl font-black text-slate-800 mb-2">نهایی‌باز <span className="text-brand-600">پلاس</span></h1>
+                            <p className="text-slate-500 font-medium">ورود به سامانه جامع ریاضی ۳</p>
+                        </div>
+                        
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-2">نام کاربری</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                                        <Icons.User />
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        className="w-full pr-10 pl-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all text-slate-800 dir-ltr text-right"
+                                        placeholder="نام کاربری"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-2">رمز عبور</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                                        <Icons.Key />
+                                    </div>
+                                    <input 
+                                        type="password" 
+                                        className="w-full pr-10 pl-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all text-slate-800 dir-ltr text-right"
+                                        placeholder="رمز عبور"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                </div>
+                                {error && <p className="text-red-500 text-xs mt-2 font-medium">{error}</p>}
+                            </div>
+                            
+                            <button 
+                                type="submit"
+                                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
+                            >
+                                ورود به سامانه
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- DATA ---
+        
+        const topicsData = [
+            {
+                id: 'func',
+                title: 'فصل ۱: تابع',
+                desc: 'انتقال، ترکیب، وارون و دامنه',
+                color: 'bg-indigo-600',
+                lightColor: 'bg-indigo-50',
+                icon: <Icons.Func />,
+                viz: 'function',
+                images: ['photo_1_2025-12-10_22-54-38.jpg', 'photo_2_2025-12-10_22-54-38.jpg', 'photo_3_2025-12-10_22-54-38.jpg'],
+                questions: [
+                    {
+                        year: 'شهریور ۱۴۰۱',
+                        score: '۰.۵',
+                        text: 'نمودار تابع <span class="math-font">f</span> داده شده است. نمودار تابع <span class="math-font">g(x) = f(x-1) - 2</span> را رسم کنید.',
+                        answer: '۱. تمام طول‌ها (x) را ۱ واحد به راست ببرید.<br>۲. تمام عرض‌ها (y) را ۲ واحد به پایین بیاورید.'
+                    },
+                    {
+                        year: 'خرداد ۱۴۰۰',
+                        score: '۰.۵',
+                        text: 'با توجه به نمودار <span class="math-font">y = f(x)</span>، نمودار <span class="math-font">y = f(x-2) + 2</span> را رسم کنید.',
+                        answer: 'انتقال ۲ واحد به راست و ۲ واحد به بالا.'
+                    },
+                    {
+                        year: 'دی ۱۳۹۹',
+                        score: '۰.۵',
+                        text: 'نمودار <span class="math-font">y = f(x+1) - 2</span> را از روی نمودار مادر رسم کنید.',
+                        answer: 'انتقال ۱ واحد به چپ و ۲ واحد به پایین.'
+                    },
+                    {
+                        year: 'شهریور ۱۳۹۸',
+                        score: '۰.۵',
+                        text: 'نمودار <span class="math-font">y = -f(x-1) + 3</span> را رسم کنید.',
+                        answer: '۱. انتقال ۱ واحد راست.<br>۲. قرینه نسبت به محور xها (منفی پشت تابع).<br>۳. انتقال ۳ واحد بالا.'
+                    },
+                    {
+                        year: 'خرداد ۱۴۰۰',
+                        score: '۱.۵',
+                        text: 'اگر <span class="math-font">f(x) = 1/x</span> و <span class="math-font">g(x) = √(x²-1)</span> باشد، دامنه تابع <span class="math-font">fog</span> را بیابید.',
+                        answer: '۱. دامنه f: همه اعداد بجز صفر.<br>۲. دامنه g: مقادیر x ≤ -1 یا x ≥ 1.<br>۳. شرط ترکیب: g(x) نباید صفر شود (چون مخرج f است).<br>۴. جواب نهایی: (-∞, -1) U (1, +∞)'
+                    },
+                    {
+                        year: 'دی ۱۴۰۳',
+                        score: '۱.۲۵',
+                        text: 'توابع <span class="math-font">f(x) = x/(x-1)</span> و <span class="math-font">g(x) = √(x-2)</span> مفروض‌اند. دامنه <span class="math-font">fog</span> را بیابید.',
+                        answer: 'اشتراک دامنه g (یعنی x ≥ 2) با شرطی که خروجی g مخالف ۱ باشد (ریشه مخرج f).<br>جواب: [2, +∞) - {3}'
+                    },
+                    {
+                        year: 'شهریور ۱۴۰۲',
+                        score: '۱.۲۵',
+                        text: 'تابع <span class="math-font">f(x) = x² + 4x + 3</span> با دامنه <span class="math-font">x ≤ -2</span> مفروض است. ضابطه وارون را بیابید.',
+                        answer: '۱. مربع کامل: y = (x+2)² - 1<br>۲. جذر گرفتن: √(y+1) = |x+2|<br>۳. تعیین علامت: چون x≤-2 است، قرینه خارج می‌شود: -(x+2)<br>۴. ضابطه نهایی: f⁻¹(x) = -2 - √(x+1)'
+                    },
+                    {
+                        year: 'دی ۱۴۰۱',
+                        score: '۱',
+                        text: 'ضابطه وارون تابع <span class="math-font">f(x) = x² - 2x - 2</span> با شرط <span class="math-font">x ≥ 1</span> را بیابید.',
+                        answer: '۱. مربع کامل: y = (x-1)² - 3<br>۲. جذر با قدرمطلق: √(y+3) = |x-1|<br>۳. شرط x≥1 مثبت است.<br>۴. ضابطه نهایی: f⁻¹(x) = 1 + √(x+3)'
+                    }
+                ]
+            },
+            {
+                id: 'trig',
+                title: 'فصل ۲: مثلثات',
+                desc: 'دوره تناوب، ضرایب و معادلات',
+                color: 'bg-teal-600',
+                lightColor: 'bg-teal-50',
+                icon: <Icons.Trig />,
+                viz: null,
+                images: ['photo_4_2025-12-10_22-54-38.jpg', 'photo_6_2025-12-10_22-54-38.jpg'],
+                questions: [
+                    {
+                        year: 'خرداد ۱۴۰۱',
+                        score: '۱.۵',
+                        text: 'نمودار <span class="math-font">y = a + b cos(πx/2)</span> داده شده است (ماکزیمم ۳ و مینیمم ۱-). مقادیر a و b را بیابید.',
+                        answer: '۱. محور وسط (a): میانگین ۳ و ۱- که می‌شود ۱.<br>۲. دامنه (b): نصف فاصله ۳ تا ۱- که می‌شود ۲.<br>۳. علامت: چون از ماکزیمم شروع شده، b مثبت است.<br>جواب: a=1, b=2'
+                    },
+                    {
+                        year: 'خرداد ۱۴۰۲',
+                        score: '۱.۵',
+                        text: 'در تابع <span class="math-font">y = 1 + a sin(bx)</span>، نمودار از ۱ شروع شده و در x=2/3 اولین مینیمم (2-) را دارد. a و b را بیابید.',
+                        answer: '۱. دامنه نوسان: فاصله ۱ تا ۲- برابر ۳ است. چون اول نزولی شده، a = -3.<br>۲. دوره تناوب: فاصله شروع تا اولین مینیمم T/4 است. T/4 = 2/3 پس T = 8/3.<br>۳. ضریب b: از فرمول 2π/|b| = 8/3 نتیجه می‌شود b = 3π/4.'
+                    },
+                    {
+                        year: 'خرداد ۱۴۰۱',
+                        score: '۱.۵',
+                        text: 'معادله مثلثاتی <span class="math-font">sin x - cos 2x = 0</span> را حل کنید.',
+                        answer: '۱. تبدیل: cos 2x = 1 - 2sin²x<br>۲. معادله درجه ۲: 2sin²x + sin x - 1 = 0<br>۳. جواب‌ها: sin x = -1 (x = 2kπ - π/2) و sin x = 1/2 (x = 2kπ + π/6 , x = 2kπ + 5π/6)'
+                    },
+                    {
+                        year: 'دی ۱۴۰۰',
+                        score: '۱.۵',
+                        text: 'معادله <span class="math-font">cos 2x - sin x = 1</span> را حل کنید.',
+                        answer: '۱. تبدیل: 1 - 2sin²x - sin x = 1<br>۲. ساده‌سازی: -2sin²x - sin x = 0<br>۳. فاکتورگیری: -sin x (2sin x + 1) = 0'
+                    },
+                    {
+                        year: 'شهریور ۱۴۰۱',
+                        score: '۱.۵',
+                        text: 'معادله <span class="math-font">2cos²x - 3sin x + 1 = 0</span> را حل کنید.',
+                        answer: 'تبدیل کسینوس توان ۲ به سینوس: 2(1-sin²x) - 3sin x + 1 = 0. معادله درجه ۲ حاصل را حل کنید.'
+                    }
+                ]
+            },
+            {
+                id: 'limit',
+                title: 'فصل ۳: حد و پیوستگی',
+                desc: 'حد در بی‌نهایت، ۰/۰ و پیوستگی',
+                color: 'bg-rose-600',
+                lightColor: 'bg-rose-50',
+                icon: <Icons.Limit />,
+                viz: null,
+                images: ['photo_7_2025-12-10_22-54-38.jpg', 'photo_8_2025-12-10_22-54-38.jpg', 'photo_9_2025-12-10_22-54-38.jpg'],
+                questions: [
+                    {
+                        year: 'خرداد ۱۴۰۲',
+                        score: '۱.۵',
+                        text: 'حاصل حد <span class="math-font">lim (3x - √(4x² + x)) / (5x...)</span> وقتی x به منفی بی‌نهایت می‌رود.',
+                        answer: 'نکته کلیدی: رادیکال ۴x² در منفی بی‌نهایت بصورت |2x| یعنی 2x- بیرون می‌آید.<br>صورت: 3x - (-2x) = 5x<br>مخرج: 5x<br>جواب: ۱'
+                    },
+                    {
+                        year: 'دی ۱۴۰۲',
+                        score: '۱.۵',
+                        text: 'حاصل حد <span class="math-font">(x-2) / ([x]-3)</span> وقتی x به سمت ۲- می‌رود.',
+                        answer: '۱. براکت [2-] می‌شود ۱. مخرج: ۱-۳ = ۲- (عدد غیر صفر)<br>۲. صورت: صفر.<br>۳. جواب: صفر (دقت کنید ابهام نیست، عدد روی صفر نیست).'
+                    },
+                    {
+                        year: 'شهریور ۱۴۰۱',
+                        score: '۰.۵',
+                        text: 'حاصل حد <span class="math-font">tan x</span> وقتی x به سمت (π/2)+ می‌رود.',
+                        answer: 'سینوس ۱ است، کسینوس در ناحیه دوم (بعد از ۹۰) منفی است (0-).<br>جواب: منفی بی‌نهایت.'
+                    },
+                    {
+                        year: 'خرداد ۱۴۰۱',
+                        score: '۱.۵',
+                        text: 'تابع f در x=3 پیوسته است. مقدار a را بیابید.<br>ضابطه بالا: <span class="math-font">(x-3)/(√x+2 - √5)</span><br>ضابطه پایین: ax - 1',
+                        answer: '۱. حد ۰/۰ را با ضرب در مزدوج رفع ابهام کنید.<br>۲. حاصل حد را مساوی مقدار تابع (3a-1) قرار دهید.'
+                    }
+                ]
+            },
+            {
+                id: 'deriv',
+                title: 'فصل ۴: مشتق',
+                desc: 'آهنگ تغییر، قواعد و خط مماس',
+                color: 'bg-amber-600',
+                lightColor: 'bg-amber-50',
+                icon: <Icons.Deriv />,
+                viz: null,
+                images: ['photo_10_2025-12-10_22-54-38.jpg', 'photo_11_2025-12-10_22-54-38.jpg', 'photo_12_2025-12-10_22-54-38.jpg'],
+                questions: [
+                    {
+                        year: 'خرداد ۱۴۰۲',
+                        score: '۱.۵',
+                        text: 'معادله حرکت <span class="math-font">f(t) = t² + 2t</span> است. الف) سرعت متوسط در [2,3]. ب) در چه لحظه‌ای سرعت لحظه‌ای با متوسط برابر است؟',
+                        answer: 'الف) (f(3)-f(2))/(3-2) = 15-8 = 7<br>ب) مشتق f\'(t) = 2t+2. قرار دادن 2t+2=7 که نتیجه می‌دهد t=2.5'
+                    },
+                    {
+                        year: 'شهریور ۱۴۰۰',
+                        score: '۱.۵',
+                        text: 'رشد قد کودک <span class="math-font">f(x) = 7√x + 50</span>. آهنگ لحظه‌ای در ماه ۴۹ام؟',
+                        answer: 'مشتق بگیرید: 7/(2√x).<br>جایگذاری 49: 7/(2*7) = 0.5'
+                    },
+                    {
+                        year: 'دی ۱۴۰۰',
+                        score: '۱.۵',
+                        text: 'معادله خط مماس بر <span class="math-font">y = x³ - 2x + 1</span> در x=2.',
+                        answer: '۱. نقطه تماس: f(2) = 5<br>۲. شیب (مشتق): 3x²-2 در نقطه ۲ می‌شود ۱۰.<br>۳. معادله: y - 5 = 10(x - 2)'
+                    },
+                    {
+                        year: 'خرداد ۱۴۰۱',
+                        score: '۱.۵',
+                        text: 'مشتق بگیرید (ساده نکنید): <span class="math-font">((2x+1)/x)⁹</span>',
+                        answer: 'قاعده زنجیره‌ای توان + مشتق تقسیم.<br>9 * ((2x+1)/x)⁸ * (مشتق کسر)'
+                    }
+                ]
+            },
+            {
+                id: 'app',
+                title: 'فصل ۵: کاربرد مشتق',
+                desc: 'اکسترمم‌ها و بهینه‌سازی',
+                color: 'bg-emerald-600',
+                lightColor: 'bg-emerald-50',
+                icon: <Icons.App />,
+                viz: 'box',
+                images: ['photo_13_2025-12-10_22-54-38.jpg', 'photo_14_2025-12-10_22-54-38.jpg', 'photo_15_2025-12-10_22-54-38.jpg'],
+                questions: [
+                    {
+                        year: 'دی ۱۴۰۰',
+                        score: '۱',
+                        text: 'اکسترمم‌های مطلق <span class="math-font">f(x) = 2x³ - 3x² - 12x</span> در بازه [-2, 3].',
+                        answer: '۱. مشتق مساوی صفر: ریشه‌ها ۲ و ۱-.<br>۲. محاسبه مقادیر تابع در: ۲، ۱-، ۲- (سر بازه) و ۳ (ته بازه).<br>۳. مقایسه اعداد برای ماکزیمم و مینیمم.'
+                    },
+                    {
+                        year: 'خرداد ۱۴۰۱',
+                        score: '۱.۷۵',
+                        text: 'از مقوای مربعی به ضلع ۳۰، جعبه روباز می‌سازیم. x چقدر باشد تا حجم ماکزیمم شود؟',
+                        answer: '۱. ابعاد: ارتفاع=x، قاعده=30-2x<br>۲. حجم: V(x) = x(30-2x)²<br>۳. مشتق و ریشه: x=5'
+                    },
+                    {
+                        year: 'خرداد ۱۴۰۲',
+                        score: '۱.۵',
+                        text: 'پنجره نورمان با محیط ۶ متر. ابعاد مستطیل برای بیشترین نوردهی؟',
+                        answer: '۱. رابطه کمکی محیط: 2y + x + πx/2 = 6<br>۲. تابع هدف مساحت را نوشته و y را حذف کنید.<br>۳. مشتق برابر صفر.'
+                    }
+                ]
+            },
+            {
+                id: 'geo',
+                title: 'فصل ۶: هندسه',
+                desc: 'دایره و بیضی',
+                color: 'bg-cyan-600',
+                lightColor: 'bg-cyan-50',
+                icon: <Icons.Geo />,
+                viz: 'geo',
+                images: ['photo_16_2025-12-10_22-54-38.jpg', 'photo_17_2025-12-10_22-54-38.jpg', 'photo_18_2025-12-10_22-54-38.jpg'],
+                questions: [
+                    {
+                        year: 'دی ۱۴۰۲',
+                        score: '۰.۷۵',
+                        text: 'مرکز و شعاع دایره <span class="math-font">x² + y² - 2x + 4y - 6 = 0</span> را بیابید.',
+                        answer: 'مرکز: قرینه نصف ضرایب (1, -2)<br>شعاع: فرمول رادیکال (1/2)√(a²+b²-4c) که می‌شود ۴.'
+                    },
+                    {
+                        year: 'خرداد ۱۴۰۲',
+                        score: '۱.۷۵',
+                        text: 'کانون‌ها F(3,1) و F\'(3,-5) و قطر کوچک ۶ است. معادله بیضی؟',
+                        answer: '۱. مرکز: وسط کانون‌ها (3, -2).<br>۲. c (نصف فاصله کانونی): ۳.<br>۳. b (نصف قطر کوچک): ۳.<br>۴. a از فیثاغورس: a² = 9+9=18.<br>۵. بیضی قائم است.'
+                    }
+                ]
+            },
+            {
+                id: 'prob',
+                title: 'فصل ۷: احتمال',
+                desc: 'قانون احتمال کل',
+                color: 'bg-purple-600',
+                lightColor: 'bg-purple-50',
+                icon: <Icons.Prob />,
+                viz: 'probability',
+                images: ['photo_19_2025-12-10_22-54-38.jpg', 'photo_20_2025-12-10_22-54-38.jpg', 'photo_21_2025-12-10_22-54-38.jpg'],
+                questions: [
+                    {
+                        year: 'خرداد ۱۴۰۲',
+                        score: '۱.۲۵',
+                        text: 'دو جعبه لامپ. جعبه اول ۹ سالم ۳ معیوب، جعبه دوم ۵ سالم ۱ معیوب. احتمال انتخاب لامپ سالم؟',
+                        answer: 'رسم درخت:<br>(1/2 * 9/12) + (1/2 * 5/6) = 19/24'
+                    },
+                    {
+                        year: 'شهریور ۱۴۰۱',
+                        score: '۱.۵',
+                        text: 'انتقال مهره از ظرف اول (۵ آبی ۷ قرمز) به دوم (۸ آبی ۶ قرمز). احتمال قرمز بودن مهره نهایی؟',
+                        answer: 'دو شاخه (انتقال قرمز یا آبی).<br>P(R) = (5/12 * 6/15) + (7/12 * 7/15)'
+                    }
+                ]
+            }
+        ];
+
+        // --- MAIN COMPONENTS ---
 
         const QuestionItem = ({ q }) => {
             const [isOpen, setIsOpen] = useState(false);
             return (
-                <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden mb-3">
+                <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden mb-3 hover:shadow-md transition-shadow">
                     <div 
                         onClick={() => setIsOpen(!isOpen)}
-                        className="p-4 cursor-pointer flex justify-between items-start gap-3 bg-gradient-to-l from-white to-slate-50"
+                        className="p-5 cursor-pointer flex justify-between items-start gap-4 bg-gradient-to-l from-white to-slate-50"
                     >
                         <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-full font-bold">{q.year}</span>
-                                <span className="bg-brand-50 text-brand-600 text-[10px] px-2 py-0.5 rounded-full font-bold">{q.score} نمره</span>
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="bg-slate-800 text-white text-[10px] px-2 py-1 rounded font-bold shadow-sm">{q.year}</span>
+                                <span className="bg-brand-50 text-brand-700 border border-brand-100 text-[10px] px-2 py-1 rounded font-bold">{q.score} نمره</span>
                             </div>
-                            <p className="text-sm text-slate-800 font-medium leading-7" dangerouslySetInnerHTML={{__html: q.text}}></p>
+                            <p className="text-base text-slate-800 font-medium leading-8" dangerouslySetInnerHTML={{__html: q.text}}></p>
                         </div>
-                        <div className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-                            <Icons.ChevronDown />
+                        <div className={`text-slate-400 bg-white p-1 rounded-full border border-slate-200 transition-transform duration-300 ${isOpen ? 'rotate-180 bg-brand-50 text-brand-600 border-brand-200' : ''}`}>
+                            {isOpen ? <Icons.ChevronUp /> : <Icons.ChevronDown />}
                         </div>
                     </div>
                     {isOpen && (
-                        <div className="p-4 bg-slate-50 border-t border-slate-100 text-sm text-slate-700 leading-7 animate-fade-in relative">
+                        <div className="p-5 bg-brand-50/30 border-t border-brand-100 text-sm text-slate-700 leading-7 animate-fade-in relative">
                             <div className="absolute top-0 right-0 w-1 h-full bg-brand-500"></div>
-                            <div dangerouslySetInnerHTML={{__html: q.answer}}></div>
+                            <div className="flex gap-3">
+                                <div className="shrink-0 mt-1 text-emerald-600"><Icons.Check /></div>
+                                <div>
+                                    <strong className="block text-emerald-700 mb-2">پاسخ تشریحی:</strong>
+                                    <div dangerouslySetInnerHTML={{__html: q.answer}}></div>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -217,10 +624,10 @@
             const [loading, setLoading] = useState(true);
 
             return (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {images.map((imgName, idx) => (
-                        <div key={idx} className="relative group rounded-xl overflow-hidden shadow-md border border-slate-200 bg-white">
-                            <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-md z-10">
+                        <div key={idx} className="relative group rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-white transition-all hover:scale-[1.02]">
+                            <div className="absolute top-3 right-3 bg-black/70 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur-md z-10 font-bold shadow-sm">
                                 صفحه {idx + 1}
                             </div>
                             <img 
@@ -230,70 +637,66 @@
                                 loading="lazy"
                                 onLoad={() => idx === 0 && setLoading(false)}
                             />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                         </div>
                     ))}
-                    {images.length === 0 && (
-                        <div className="text-center py-10 text-slate-400 text-sm bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                            تصویری برای این فصل یافت نشد.
-                        </div>
-                    )}
                 </div>
             );
         };
 
         const TopicDetail = ({ topic, onBack }) => {
-            const [activeTab, setActiveTab] = useState('questions'); // questions, notes, viz
+            const [activeTab, setActiveTab] = useState('questions'); 
 
             return (
                 <div className="min-h-screen bg-slate-50 pb-20 animate-slide-up">
-                    {/* Header */}
-                    <div className={`sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all`}>
-                        <div className="flex items-center justify-between p-4">
-                            <button onClick={onBack} className="p-2 -mr-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
-                                <Icons.Back />
-                            </button>
-                            <h2 className="font-black text-slate-800 text-lg">{topic.title}</h2>
-                            <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600">
-                                {topic.icon}
+                    <div className={`sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all`}>
+                        <div className="max-w-6xl mx-auto">
+                            <div className="flex items-center justify-between p-4">
+                                <div className="flex items-center gap-3">
+                                    <button onClick={onBack} className="p-2 -mr-2 text-slate-600 hover:bg-slate-100 hover:text-brand-600 rounded-full transition-colors">
+                                        <Icons.Back />
+                                    </button>
+                                    <div className={`w-10 h-10 rounded-xl ${topic.lightColor} flex items-center justify-center ${topic.color.replace('bg-', 'text-')}`}>
+                                        {topic.icon}
+                                    </div>
+                                    <h2 className="font-black text-slate-800 text-xl">{topic.title}</h2>
+                                </div>
                             </div>
-                        </div>
-                        
-                        {/* Tabs */}
-                        <div className="flex px-4 gap-4 overflow-x-auto no-scrollbar pb-1">
-                            <button 
-                                onClick={() => setActiveTab('questions')}
-                                className={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'questions' ? 'border-brand-600 text-brand-600' : 'border-transparent text-slate-500'}`}
-                            >
-                                <Icons.Exam />
-                                بانک سوال
-                            </button>
-                            <button 
-                                onClick={() => setActiveTab('notes')}
-                                className={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'notes' ? 'border-brand-600 text-brand-600' : 'border-transparent text-slate-500'}`}
-                            >
-                                <Icons.Book />
-                                درسنامه‌های تصویری
-                            </button>
-                            {topic.viz && (
+                            
+                            <div className="flex px-4 gap-6 overflow-x-auto no-scrollbar pb-0">
                                 <button 
-                                    onClick={() => setActiveTab('viz')}
-                                    className={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'viz' ? 'border-brand-600 text-brand-600' : 'border-transparent text-slate-500'}`}
+                                    onClick={() => setActiveTab('questions')}
+                                    className={`relative pb-3 text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'questions' ? 'text-brand-600' : 'text-slate-500 hover:text-slate-800'}`}
                                 >
-                                    <Icons.Chart />
-                                    شبیه‌سازی
+                                    <span className="flex items-center gap-2"><Icons.Exam /> بانک سوالات ({topic.questions.length})</span>
+                                    {activeTab === 'questions' && <span className="absolute bottom-0 left-0 w-full h-1 bg-brand-600 rounded-t-full"></span>}
                                 </button>
-                            )}
+                                <button 
+                                    onClick={() => setActiveTab('notes')}
+                                    className={`relative pb-3 text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'notes' ? 'text-brand-600' : 'text-slate-500 hover:text-slate-800'}`}
+                                >
+                                    <span className="flex items-center gap-2"><Icons.Book /> درسنامه‌های تصویری</span>
+                                    {activeTab === 'notes' && <span className="absolute bottom-0 left-0 w-full h-1 bg-brand-600 rounded-t-full"></span>}
+                                </button>
+                                {topic.viz && (
+                                    <button 
+                                        onClick={() => setActiveTab('viz')}
+                                        className={`relative pb-3 text-sm font-bold transition-colors whitespace-nowrap ${activeTab === 'viz' ? 'text-brand-600' : 'text-slate-500 hover:text-slate-800'}`}
+                                    >
+                                        <span className="flex items-center gap-2"><Icons.Chart /> شبیه‌ساز تعاملی</span>
+                                        {activeTab === 'viz' && <span className="absolute bottom-0 left-0 w-full h-1 bg-brand-600 rounded-t-full"></span>}
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Content */}
-                    <div className="p-4 max-w-2xl mx-auto">
+                    <div className="p-4 max-w-4xl mx-auto mt-6">
                         {activeTab === 'questions' && (
                             <div className="space-y-4 animate-fade-in">
-                                <div className="bg-blue-50 text-blue-800 p-3 rounded-lg text-xs font-medium mb-4 flex items-start gap-2 border border-blue-100">
-                                    <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    سوالات زیر منتخب امتحانات نهایی ۵ سال اخیر هستند.
+                                <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm font-medium mb-6 flex items-start gap-3 border border-blue-100 shadow-sm">
+                                    <svg className="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    سوالات زیر دقیقاً از امتحانات نهایی ۵ سال اخیر استخراج و دسته‌بندی شده‌اند. برای تسلط کامل، پاسخ‌های تشریحی را با دقت مطالعه کنید.
                                 </div>
                                 {topic.questions.map((q, idx) => (
                                     <QuestionItem key={idx} q={q} />
@@ -308,9 +711,11 @@
                         )}
 
                         {activeTab === 'viz' && (
-                            <div className="animate-fade-in">
+                            <div className="animate-fade-in max-w-2xl mx-auto">
                                 {topic.viz === 'probability' && <ProbabilityViz />}
                                 {topic.viz === 'function' && <FunctionViz />}
+                                {topic.viz === 'geo' && <GeometryViz />}
+                                {topic.viz === 'box' && <BoxOptimizationViz />}
                             </div>
                         )}
                     </div>
@@ -318,179 +723,110 @@
             );
         };
 
-        const HomePage = ({ topics, onSelect }) => {
+        const HomePage = ({ topics, onSelect, user, onLogout }) => {
             return (
-                <div className="p-4 max-w-md mx-auto min-h-screen">
-                    <header className="py-6 mb-2">
-                        <div className="flex items-center gap-3 mb-2">
-                             <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-brand-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                             </div>
-                             <h1 className="text-2xl font-black text-slate-800 tracking-tight">نهایی‌باز <span className="text-brand-600">پلاس</span></h1>
+                <div className="min-h-screen bg-slate-50">
+                    <header className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+                        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                </div>
+                                <h1 className="text-xl font-black text-slate-800 tracking-tight hidden sm:block">نهایی‌باز <span className="text-brand-600">پلاس</span></h1>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
+                                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                                    <span className="text-xs font-bold text-slate-600">{user}</span>
+                                </div>
+                                <button onClick={onLogout} className="text-slate-400 hover:text-red-500 transition-colors p-1" title="خروج">
+                                    <Icons.Logout />
+                                </button>
+                            </div>
                         </div>
-                        <p className="text-slate-500 text-sm font-medium pr-1">مرجع هوشمند امتحانات نهایی ریاضی ۳</p>
                     </header>
 
-                    <div className="grid gap-4">
-                        {topics.map(topic => (
-                            <div 
-                                key={topic.id}
-                                onClick={() => onSelect(topic)}
-                                className="group bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-brand-200 transition-all cursor-pointer relative overflow-hidden"
-                            >
-                                <div className={`absolute top-0 right-0 w-1.5 h-full ${topic.color}`}></div>
-                                <div className="flex justify-between items-center">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`p-3 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors`}>
-                                            {topic.icon}
+                    <main className="max-w-6xl mx-auto p-4 md:p-8">
+                        <div className="text-center mb-10 mt-4">
+                             <h2 className="text-3xl md:text-4xl font-black text-slate-800 mb-4">دسته‌بندی موضوعی سوالات</h2>
+                             <p className="text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed">
+                                جامع‌ترین بانک سوالات امتحان نهایی ریاضی ۳ (دوازدهم تجربی) به تفکیک فصل، همراه با درسنامه‌های تصویری و ابزارهای یادگیری تعاملی.
+                             </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {topics.map(topic => (
+                                <div 
+                                    key={topic.id}
+                                    onClick={() => onSelect(topic)}
+                                    className="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-brand-200 transition-all cursor-pointer relative overflow-hidden"
+                                >
+                                    <div className={`absolute top-0 right-0 w-full h-2 ${topic.color}`}></div>
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className={`p-4 rounded-2xl ${topic.lightColor} ${topic.color.replace('bg-', 'text-')} group-hover:scale-110 transition-transform duration-300`}>
+                                                {topic.icon}
+                                            </div>
+                                            <div className="bg-slate-50 text-slate-400 p-2 rounded-full group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="font-bold text-slate-800 text-lg">{topic.title}</h3>
-                                            <p className="text-xs text-slate-500 mt-1">{topic.desc}</p>
+                                        <h3 className="font-bold text-slate-800 text-xl mb-2">{topic.title}</h3>
+                                        <p className="text-sm text-slate-500 leading-6">{topic.desc}</p>
+                                        
+                                        <div className="mt-6 flex items-center gap-3 text-xs font-bold text-slate-400 border-t border-slate-50 pt-4">
+                                            <span className="flex items-center gap-1"><Icons.Exam /> {topic.questions.length} سوال</span>
+                                            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                            <span className="flex items-center gap-1"><Icons.Book /> {topic.images.length} اسلاید</span>
                                         </div>
-                                    </div>
-                                    <div className="text-slate-300 group-hover:text-brand-400 transition-colors transform group-hover:-translate-x-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    </main>
                     
-                    <footer className="mt-12 text-center text-xs text-slate-400 font-mono dir-ltr opacity-60">
-                        Version 2.0.0 | Github Connected
+                    <footer className="bg-white border-t border-slate-200 mt-20 py-8">
+                        <div className="max-w-6xl mx-auto px-4 text-center">
+                            <p className="text-slate-400 text-sm font-mono dir-ltr mb-2">Developed with ❤️ for Students</p>
+                            <p className="text-slate-300 text-xs">Version 3.2.0 | FinalExamPro</p>
+                        </div>
                     </footer>
                 </div>
             );
         };
 
-        // --- DATA ---
-        
-        // Note: Using a subset of images for demo purposes based on chapter logic.
-        // In a real app, you would map every single file specifically.
-        const topicsData = [
-            {
-                id: 'func',
-                title: 'فصل ۱: تابع',
-                desc: 'انتقال، ترکیب و وارون',
-                color: 'bg-indigo-500',
-                icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>,
-                viz: 'function',
-                images: [
-                    'photo_1_2025-12-10_22-54-38.jpg',
-                    'photo_2_2025-12-10_22-54-38.jpg', 
-                    'photo_3_2025-12-10_22-54-38.jpg'
-                ],
-                questions: [
-                    {
-                        year: 'دی ۱۴۰۱',
-                        score: '۱.۵',
-                        text: 'نمودار تابع <span class="math-font">f(x)</span> داده شده است. نمودار <span class="math-font">y = f(x-1) - 2</span> را رسم کنید.',
-                        answer: '۱. انتقال ۱ واحد به راست (x-1).<br>۲. انتقال ۲ واحد به پایین (-2).'
-                    },
-                    {
-                        year: 'خرداد ۱۴۰۰',
-                        score: '۱',
-                        text: 'ضابطه وارون تابع <span class="math-font">f(x) = x² - 2x</span> برای <span class="math-font">x ≥ 1</span> را بیابید.',
-                        answer: 'با مربع کامل کردن: <span class="math-font">y = (x-1)² - 1</span>. سپس <span class="math-font">x</span> را تنها می‌کنیم.'
-                    }
-                ]
-            },
-            {
-                id: 'trig',
-                title: 'فصل ۲: مثلثات',
-                desc: 'تناوب و معادلات مثلثاتی',
-                color: 'bg-teal-500',
-                icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-                viz: null,
-                images: [
-                    'photo_4_2025-12-10_22-54-38.jpg',
-                    'photo_5_2025-12-10_22-54-38.jpg',
-                    'photo_6_2025-12-10_22-54-38.jpg'
-                ],
-                questions: [
-                    {
-                        year: 'خرداد ۱۴۰۲',
-                        score: '۱.۵',
-                        text: 'معادله <span class="math-font">sin x - cos 2x = 0</span> را حل کنید.',
-                        answer: 'تبدیل کسینوس: <span class="math-font">cos 2x = 1 - 2sin²x</span>. سپس معادله درجه دو بر حسب سینوس حل شود.'
-                    }
-                ]
-            },
-            {
-                id: 'limit',
-                title: 'فصل ۳: حد بی‎نهایت',
-                desc: 'رفع ابهام و مجانب‌ها',
-                color: 'bg-rose-500',
-                icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4"/><path d="M12 16V8"/></svg>,
-                viz: null,
-                images: [
-                    'photo_7_2025-12-10_22-54-38.jpg',
-                    'photo_8_2025-12-10_22-54-38.jpg',
-                    'photo_9_2025-12-10_22-54-38.jpg'
-                ],
-                questions: [
-                    {
-                        year: 'دی ۱۴۰۰',
-                        score: '۱.۲۵',
-                        text: 'حاصل حد <span class="math-font">lim (x→-∞) (2x + √x²) / 3x</span> را بیابید.',
-                        answer: 'چون به منفی بی‌نهایت می‌رویم، <span class="math-font">√x² = |x| = -x</span>. جواب نهایی <span class="math-font">1/3</span>.'
-                    }
-                ]
-            },
-            {
-                id: 'deriv',
-                title: 'فصل ۴: مشتق',
-                desc: 'آهنگ تغییر و قواعد',
-                color: 'bg-orange-500',
-                icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>,
-                viz: null,
-                images: [
-                    'photo_10_2025-12-10_22-54-38.jpg',
-                    'photo_11_2025-12-10_22-54-38.jpg',
-                    'photo_12_2025-12-10_22-54-38.jpg'
-                ],
-                questions: [
-                    {
-                        year: 'خرداد ۱۴۰۱',
-                        score: '۱',
-                        text: 'مشتق تابع <span class="math-font">f(x) = (x²-1)³</span> را بیابید.',
-                        answer: 'قاعده زنجیره‌ای: <span class="math-font">f\'(x) = 3(x²-1)²(2x)</span>.'
-                    }
-                ]
-            },
-            {
-                id: 'prob',
-                title: 'فصل ۷: احتمال',
-                desc: 'قانون احتمال کل و برنولی',
-                color: 'bg-sky-500',
-                icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h10"/></svg>,
-                viz: 'probability',
-                images: [
-                    'photo_19_2025-12-10_22-54-38.jpg',
-                    'photo_20_2025-12-10_22-54-38.jpg',
-                    'photo_21_2025-12-10_22-54-38.jpg'
-                ],
-                questions: [
-                    {
-                        year: 'دی ۱۴۰۲',
-                        score: '۱.۵',
-                        text: 'احتمال انتقال مهره از ظرف A به B و انتخاب مجدد را محاسبه کنید.',
-                        answer: 'استفاده از فرمول احتمال کل: <span class="math-font">P(E) = P(E|A)P(A) + P(E|B)P(B)</span>.'
-                    }
-                ]
-            }
-        ];
-
         const App = () => {
+            const [user, setUser] = useState(null);
             const [selectedTopic, setSelectedTopic] = useState(null);
+
+            // Simple session persistence
+            useEffect(() => {
+                const savedUser = localStorage.getItem('math3_user');
+                if (savedUser) setUser(savedUser);
+            }, []);
+
+            const handleLogin = (username) => {
+                setUser(username);
+                localStorage.setItem('math3_user', username);
+            };
+
+            const handleLogout = () => {
+                setUser(null);
+                setSelectedTopic(null);
+                localStorage.removeItem('math3_user');
+            };
+
+            if (!user) {
+                return <LoginPage onLogin={handleLogin} />;
+            }
 
             return (
                 <div dir="rtl">
                     {selectedTopic ? (
                         <TopicDetail topic={selectedTopic} onBack={() => setSelectedTopic(null)} />
                     ) : (
-                        <HomePage topics={topicsData} onSelect={setSelectedTopic} />
+                        <HomePage topics={topicsData} onSelect={setSelectedTopic} user={user} onLogout={handleLogout} />
                     )}
                 </div>
             );
